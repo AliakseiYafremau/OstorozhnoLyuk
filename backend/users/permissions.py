@@ -13,7 +13,7 @@ class IsOwner(BasePermission):
 
 class IsAdmin(BasePermission):
 
-    def has_permission(self, request, view, obj):
+    def has_permission(self, request, view):
 
         if request.user.is_admin:
             return True
@@ -23,7 +23,7 @@ class IsAdmin(BasePermission):
 
 class IsModerator(BasePermission):
 
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         
         if request.user.is_moderator or request.user.is_admin:
             return True

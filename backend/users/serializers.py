@@ -9,7 +9,15 @@ class LoginSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    email = serializers.EmailField()
+    is_moderator = serializers.BooleanField()
+    is_admin = serializers.BooleanField()
+
+
+class CreateUserSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+    is_moderator = serializers.BooleanField()
+    is_admin = serializers.BooleanField()
     
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'is_moderator', 'is_admin']

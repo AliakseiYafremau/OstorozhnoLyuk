@@ -6,10 +6,22 @@ from users.models import User
 
 def create_test_data(apps, schema_editor):
 
-    User.objects.create_user(email='1@mail.ru', password='pass1')
-    User.objects.create_user(email='2@mail.ru', password='pass2')
-    User.objects.create_user(email='3@mail.ru', password='pass3')
+    User.objects.create_user(email='user1@example.com', password='pass1',
+                             is_moderator=False, is_admin=False)
+    User.objects.create_user(email='user2@example.com', password='pass2',
+                             is_moderator=False, is_admin=False)
+    User.objects.create_user(email='user3@example.com', password='pass3',
+                             is_moderator=False, is_admin=False)
 
+    User.objects.create_user(email='moderator1@example.com', password='pass1',
+                             is_moderator=True, is_admin=False)
+    User.objects.create_user(email='moderator2@example.com', password='pass2',
+                             is_moderator=True, is_admin=False)
+    User.objects.create_user(email='moderator3@example.com', password='pass3',
+                             is_moderator=True, is_admin=False)
+
+    User.objects.create_user(email='admin@example.com', password='admin',
+                             is_moderator=True, is_admin=True)
 
 class Migration(migrations.Migration):
 
