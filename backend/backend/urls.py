@@ -27,7 +27,7 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView
 )
 
-from users.views import UserView, LoginView
+from users.views import UserView, LoginView, ListUsersView, UpdateDeleteUserView
 
 
 schema_view = get_schema_view(
@@ -43,7 +43,9 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('user/', UserView.as_view(), name='user'),
+    path('user/', UserView.as_view(), name='user'), # Получание текущего пользователя.
+    path('user/<int:pk>/', UpdateDeleteUserView.as_view(), name='update_delete_user'), # Для администратора. Получаение пользователя по id. Изменение, удаление.
+    path('users/', ListUsersView.as_view(), name='list_users'), # Для администратора. Получение списка пользователей.
 
     path('login/', LoginView.as_view(), name='login'),
     

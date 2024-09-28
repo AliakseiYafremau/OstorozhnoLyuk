@@ -1,6 +1,7 @@
 from rest_framework.permissions import BasePermission
 
 
+# Владелец ли
 class IsOwner(BasePermission):
 
     def has_object_permission(self, request, view, obj):
@@ -11,6 +12,7 @@ class IsOwner(BasePermission):
             return False
 
 
+# Администратор ли
 class IsAdmin(BasePermission):
 
     def has_permission(self, request, view):
@@ -21,6 +23,7 @@ class IsAdmin(BasePermission):
             return False
 
 
+# Модератор ли
 class IsModerator(BasePermission):
 
     def has_permission(self, request, view):

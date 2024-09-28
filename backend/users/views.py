@@ -6,13 +6,14 @@ from rest_framework import status, permissions
 
 from .models import User
 from .permissions import IsAdmin, IsModerator
-from .serializers import LoginSerializer, UserSerializer, CreateUserSerializer
+from .serializers import LoginSerializer, UserSerializer, CreateUserSerializer, UpdateUserSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from .simple_jwt_serializers import TokenObtainPairResponseSerializer
 
 
+# Эндпоинт пользователя
 class UserView(APIView):
 
     def get_permissions(self):
@@ -20,6 +21,7 @@ class UserView(APIView):
             return [permissions.IsAuthenticated()]
         return [permissions.IsAuthenticated(), IsAdmin()]
 
+    # Возвращаение информации о пользователе
     @swagger_auto_schema(
         operation_description='Получение информации о пользователе. Необходимо быть авторизованным. Никакие параметры не нужны.',
         responses={
@@ -32,6 +34,7 @@ class UserView(APIView):
         user_serializer = UserSerializer(user)
         return Response(user_serializer.data, status=status.HTTP_200_OK)
     
+    # Создание нового пользователя
     @swagger_auto_schema(
         operation_description='Создание нового пользователя. Необходимо быть администратором.',
         request_body=openapi.Schema(
@@ -63,8 +66,51 @@ class UserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class ListUsersView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+
+    # Возвращение списка пользователей
+    @swagger_auto_schema(
+        operation_description='Получение списка пользователей. Необходимо быть администратором. Никакие параметры не нужны.',
+        responses={
+            200: UserSerializer,
+            401: "Некорректные данные"
+        },
+    )
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+
+# Обновление и удаление пользователя
+class UpdateDeleteUserView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+
+    def get(self, request, pk):
+        user = User.objects.get(id=pk)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+    # Обновление информации о пользователе
+    def put(self, request, pk):
+        user = User.objects.get(id=pk)
+        serializer = UpdateUserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # Удаление пользователя
+    def delete(self, request, pk):
+        user = User.objects.get(id=pk)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Эндпоинт аутентификации
 class LoginView(APIView):
 
+    # Аутентификация. Возвращает JWT-токен
     @swagger_auto_schema(
         operation_description='Аутентификация пользователя.',
         request_body=openapi.Schema(
