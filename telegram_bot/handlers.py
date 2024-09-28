@@ -2,7 +2,7 @@ from aiogram import Router, F, html
 from aiogram.filters import CommandStart
 from aiogram.types import Message, CallbackQuery
 
-from telegram_bot.inline_kbs import ease_link_kb
+from inline_kbs import ease_link_kb
 
 
 start_router = Router()

@@ -6,7 +6,7 @@ from os import getenv
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from telegram_bot.handlers import start_router
+from handlers import start_router
 from dotenv import load_dotenv
 
 load_dotenv()
