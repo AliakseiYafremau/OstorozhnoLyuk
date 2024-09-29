@@ -186,4 +186,11 @@ SIMPLE_JWT = {
 
 SWAGGER_SETTINGS = {
     'DEFAULT_API_URL': os.getenv('DJANGO_DEFAULT_URL'),
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+        },
+    },
 }

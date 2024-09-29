@@ -38,7 +38,7 @@ schema_view = get_schema_view(
         terms_of_service="htttps://www.google.com/policies/terms/",
     ),
     public=True,
-    permission_classes=(AllowAny,)
+    permission_classes=(AllowAny,),
 )
 
 urlpatterns = [
