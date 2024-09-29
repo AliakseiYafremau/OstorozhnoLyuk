@@ -42,18 +42,18 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('user/', UserView.as_view(), name='user'), # Получание текущего пользователя.
-    path('user/<int:pk>/', UpdateDeleteUserView.as_view(), name='update_delete_user'), # Для администратора. Получаение пользователя по id. Изменение, удаление.
-    path('users/', ListUsersView.as_view(), name='list_users'), # Для администратора. Получение списка пользователей.
+    path('account/admin/', admin.site.urls),
+    path('account/user/', UserView.as_view(), name='user'), # Получание текущего пользователя.
+    path('account/user/<int:pk>/', UpdateDeleteUserView.as_view(), name='update_delete_user'), # Для администратора. Получаение пользователя по id. Изменение, удаление.
+    path('account/users/', ListUsersView.as_view(), name='list_users'), # Для администратора. Получение списка пользователей.
 
-    path('login/', LoginView.as_view(), name='login'),
+    path('account/login/', LoginView.as_view(), name='login'),
     
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('account/api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('account/api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('account/api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
-    path('swagger/<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('account/swagger/<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('account/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('account/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]

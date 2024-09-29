@@ -183,3 +183,7 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
+
+SWAGGER_SETTINGS = {
+    'DEFAULT_API_URL': os.getenv('DJANGO_DEFAULT_URL'),
+}
