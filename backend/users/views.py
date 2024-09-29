@@ -6,6 +6,7 @@ from rest_framework import status, permissions
 
 from .models import User
 from .permissions import IsAdmin, IsModerator
+from .custom_schema import header_param, id_param, email_schema, password_schema, is_moderator_schema, is_admin_schema
 from .serializers import LoginSerializer, UserSerializer, CreateUserSerializer, UpdateUserSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -24,6 +25,9 @@ class UserView(APIView):
     # Возвращаение информации о пользователе
     @swagger_auto_schema(
         operation_description='Получение информации о пользователе. Необходимо быть авторизованным. Никакие параметры не нужны.',
+        manual_parameters=[
+            header_param,
+        ],
         responses={
             200: UserSerializer,
             401: "Некорректные данные"
@@ -37,14 +41,17 @@ class UserView(APIView):
     # Создание нового пользователя
     @swagger_auto_schema(
         operation_description='Создание нового пользователя. Необходимо быть администратором.',
+        manual_parameters=[
+            header_param,
+        ],
         request_body=openapi.Schema(
             required=['email', 'password', 'is_moderator', 'is_admin'],
             type=openapi.TYPE_OBJECT,
             properties={
-                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Почта пользователя'),
-                'password': openapi.Schema(type=openapi.TYPE_STRING, description='Пароль пользователя'),
-                'is_moderator': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Модератор или нет'),
-                'is_admin': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Админ или нет'),
+                'email': email_schema,
+                'password': password_schema,
+                'is_moderator': is_moderator_schema,
+                'is_admin': is_admin_schema,
             }
         ),
         responses={
@@ -72,8 +79,11 @@ class ListUsersView(APIView):
     # Возвращение списка пользователей
     @swagger_auto_schema(
         operation_description='Получение списка пользователей. Необходимо быть администратором. Никакие параметры не нужны.',
+        manual_parameters=[
+            header_param,
+        ],
         responses={
-            200: UserSerializer,
+            200: UserSerializer(many=True),
             401: "Некорректные данные"
         },
     )
@@ -86,12 +96,44 @@ class ListUsersView(APIView):
 class UpdateDeleteUserView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
+    # Возвращение информации о пользователе
+    @swagger_auto_schema(
+        operation_description='Получение информации о пользователе. Необходимо быть администратором. Необходим id пользователя в URL.',
+        manual_parameters=[
+            header_param,
+            id_param,
+        ],
+        responses={
+            200: UserSerializer,
+            401: "Некорректные данные"
+        }
+    )
     def get(self, request, pk):
         user = User.objects.get(id=pk)
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
     # Обновление информации о пользователе
+    @swagger_auto_schema(
+        operation_description='Изменение пользователя. Необходимо быть администратором. Необходим id изменяемого пользователя в URL, а также изменяемые данные в теле запроса.',
+        manual_parameters=[
+            header_param,
+            id_param,
+        ],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': email_schema,
+                'password': password_schema,
+                'is_moderator': is_moderator_schema,
+                'is_admin': is_admin_schema,
+            }
+        ),
+        responses={
+            200: UserSerializer,
+            401: "Некорректные данные"
+        }
+    )
     def put(self, request, pk):
         user = User.objects.get(id=pk)
         serializer = UpdateUserSerializer(user, data=request.data)
@@ -101,6 +143,18 @@ class UpdateDeleteUserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # Удаление пользователя
+    @swagger_auto_schema(
+        operation_description='Удаление пользователя. Необходимо быть администратором. '
+                              'Необходим id пользователя в URL.',
+        manual_parameters=[
+            header_param,
+            id_param,
+        ],
+        responses={
+            204: "Удалено",
+            401: "Некорректные данные"
+        }
+    )
     def delete(self, request, pk):
         user = User.objects.get(id=pk)
         user.delete()
@@ -117,8 +171,8 @@ class LoginView(APIView):
             required=['email', 'password', 'is_moderator', 'is_admin'],
             type=openapi.TYPE_OBJECT,
             properties={
-                'email': openapi.Schema(type=openapi.TYPE_STRING, description='Почта пользователя'),
-                'password': openapi.Schema(type=openapi.TYPE_STRING, description='Пароль пользователя'),
+                'email': email_schema,
+                'password': password_schema,
             }
         ),
         responses={
