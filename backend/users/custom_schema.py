@@ -15,6 +15,10 @@ id_param = openapi.Parameter(
     type=openapi.TYPE_INTEGER,
 )
 
+id_scheme = openapi.Schema(
+    type=openapi.TYPE_INTEGER,
+    description='ID пользователя')
+
 email_schema = openapi.Schema(
     type=openapi.TYPE_STRING,
     description='Почта пользователя')

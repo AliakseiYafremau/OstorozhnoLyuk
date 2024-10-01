@@ -1,13 +1,15 @@
+from django.db import transaction
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import status, permissions
 
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import status, permissions
 
 from .models import User
 from .permissions import IsAdmin, IsModerator
 from .custom_schema import header_param, id_param, email_schema, password_schema, is_moderator_schema, is_admin_schema
-from .serializers import LoginSerializer, UserSerializer, CreateUserSerializer, UpdateUserSerializer
+from .serializers import LoginSerializer, UserSerializer, CreateUserSerializer, UpdateUserSerializer, ChangeAdminSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
@@ -51,12 +53,13 @@ class UserView(APIView):
                 'email': email_schema,
                 'password': password_schema,
                 'is_moderator': is_moderator_schema,
-                'is_admin': is_admin_schema,
+                # 'is_admin': is_admin_schema,
             }
         ),
         responses={
             201: UserSerializer,
-            400: "Некорректные данные"
+            400: "Некорректные данные",
+            403: "Недостаточно прав"
         }
     )
     def post(self, request):
@@ -65,14 +68,17 @@ class UserView(APIView):
             email = serializer.validated_data.get('email')
             password = serializer.validated_data.get('password')
             is_moderator = serializer.validated_data.get('is_moderator')
-            is_admin = serializer.validated_data.get('is_admin')
+            # is_admin = serializer.validated_data.get('is_admin')
+            # user = User.objects.create_user(email=email, password=password,
+            #                                 is_moderator=is_moderator, is_admin=is_admin)
             user = User.objects.create_user(email=email, password=password,
-                                            is_moderator=is_moderator, is_admin=is_admin)
+                                            is_moderator=is_moderator)
             user_serializer = UserSerializer(user)
             return Response(user_serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# Эндпоинт списка пользователей
 class ListUsersView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
@@ -84,7 +90,8 @@ class ListUsersView(APIView):
         ],
         responses={
             200: UserSerializer(many=True),
-            401: "Некорректные данные"
+            401: "Некорректные данные",
+            403: "Недостаточно прав"
         },
     )
     def get(self, request):
@@ -92,7 +99,8 @@ class ListUsersView(APIView):
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
 
-# Обновление и удаление пользователя
+
+# Эндпоинт обновление и удаление пользователя
 class UpdateDeleteUserView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
@@ -105,7 +113,8 @@ class UpdateDeleteUserView(APIView):
         ],
         responses={
             200: UserSerializer,
-            401: "Некорректные данные"
+            401: "Некорректные данные",
+            403: "Недостаточно прав"
         }
     )
     def get(self, request, pk):
@@ -126,12 +135,13 @@ class UpdateDeleteUserView(APIView):
                 'email': email_schema,
                 'password': password_schema,
                 'is_moderator': is_moderator_schema,
-                'is_admin': is_admin_schema,
+                # 'is_admin': is_admin_schema,
             }
         ),
         responses={
             200: UserSerializer,
-            401: "Некорректные данные"
+            401: "Некорректные данные",
+            403: "Недостаточно прав"
         }
     )
     def put(self, request, pk):
@@ -139,7 +149,7 @@ class UpdateDeleteUserView(APIView):
         serializer = UpdateUserSerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # Удаление пользователя
@@ -152,13 +162,53 @@ class UpdateDeleteUserView(APIView):
         ],
         responses={
             204: "Удалено",
-            401: "Некорректные данные"
+            401: "Некорректные данные",
+            403: "Недостаточно прав"
         }
     )
     def delete(self, request, pk):
         user = User.objects.get(id=pk)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Эндпоинт передачи прав администратора
+class ChangeAdminView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+
+    @swagger_auto_schema(
+        operation_description='Передача прав администратора.',
+        request_body=openapi.Schema(
+            required=['id'],
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'id': id_param,
+            }
+        ),
+        responses={
+            200: None,
+            401: "Некорректные данные",
+            403: "Недостаточно прав"
+        }
+    )
+    def post(self, request):
+        serializer = ChangeAdminSerializer(data=request.data)
+        if serializer.is_valid():
+            if not User.objects.filter(id=serializer.validated_data.get('id', None)).exists():
+                return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            current_admin = User.objects.get(id=request.user.id)
+            new_admin = User.objects.get(id=serializer.validated_data.get('id', None))
+            with transaction.atomic():
+                new_admin.is_admin = True
+                new_admin.is_moderator = True
+                current_admin.is_admin = False
+                current_admin.is_moderator = True
+                new_admin.save()
+                current_admin.save()
+                return Response(status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Эндпоинт аутентификации
@@ -176,8 +226,9 @@ class LoginView(APIView):
             }
         ),
         responses={
-            201: TokenObtainPairResponseSerializer,
-            401: "Некорректные данные"
+            200: TokenObtainPairResponseSerializer,
+            401: "Некорректные данные",
+            403: "Недостаточно прав"
         }
     )
     def post(self, request):
