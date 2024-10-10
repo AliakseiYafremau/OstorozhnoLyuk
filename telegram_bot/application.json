@@ -1,0 +1,28 @@
+{
+    "1355623463": {
+        "location": {
+            "latitude": 54.762813,
+            "longitude": 56.07153
+        },
+        "city": "лоп",
+        "address": "длоп",
+        "photo": [
+            "photos\\user_photo_1.jpg",
+            "photos\\user_photo_2.jpg",
+            "photos\\user_photo_3.jpg"
+        ]
+    },
+    "1355623463": {
+        "location": {
+            "latitude": 54.762792,
+            "longitude": 56.071554
+        },
+        "city": "лрп",
+        "address": "жли",
+        "photo": [
+            "photos\\user_photo_1.jpg",
+            "photos\\user_photo_2.jpg",
+            "photos\\user_photo_3.jpg"
+        ]
+    }
+}
