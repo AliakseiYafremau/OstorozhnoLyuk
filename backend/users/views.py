@@ -4,11 +4,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User
 from .permissions import IsAdmin, IsModerator
-from .custom_schema import header_param, id_param, email_schema, password_schema, is_moderator_schema, is_admin_schema
+from .custom_schema import *
 from .serializers import LoginSerializer, UserSerializer, CreateUserSerializer, UpdateUserSerializer, ChangeAdminSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -197,16 +198,19 @@ class ChangeAdminView(APIView):
             if not User.objects.filter(id=serializer.validated_data.get('id', None)).exists():
                 return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
             
-            current_admin = User.objects.get(id=request.user.id)
-            new_admin = User.objects.get(id=serializer.validated_data.get('id', None))
-            with transaction.atomic():
-                new_admin.is_admin = True
-                new_admin.is_moderator = True
-                current_admin.is_admin = False
-                current_admin.is_moderator = True
-                new_admin.save()
-                current_admin.save()
-                return Response(status=status.HTTP_200_OK)
+            if serializer.validated_data.get('id', None) == request.user.id:
+                return Response({'error': 'Вы не можете передать права администратора самому себе'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                current_admin = User.objects.get(id=request.user.id)
+                new_admin = User.objects.get(id=serializer.validated_data.get('id', None))
+                with transaction.atomic():
+                    new_admin.is_admin = True
+                    new_admin.is_moderator = True
+                    current_admin.is_admin = False
+                    current_admin.is_moderator = True
+                    new_admin.save()
+                    current_admin.save()
+                    return Response(status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -218,7 +222,7 @@ class LoginView(APIView):
     @swagger_auto_schema(
         operation_description='Аутентификация пользователя.',
         request_body=openapi.Schema(
-            required=['email', 'password', 'is_moderator', 'is_admin'],
+            required=['email', 'password'],
             type=openapi.TYPE_OBJECT,
             properties={
                 'email': email_schema,
@@ -228,7 +232,6 @@ class LoginView(APIView):
         responses={
             200: TokenObtainPairResponseSerializer,
             401: "Некорректные данные",
-            403: "Недостаточно прав"
         }
     )
     def post(self, request):
@@ -247,3 +250,61 @@ class LoginView(APIView):
                 return Response({'tokens': data}, status=status.HTTP_200_OK)
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class TokenRefreshView(TokenRefreshView):
+    @swagger_auto_schema(
+        operation_description='Обновление JWT-токена',
+        request_body=openapi.Schema(
+            required=['refresh'],
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'refresh': refresh_token_schema,
+            }
+        ),
+        responses={
+            200: TokenObtainPairResponseSerializer,
+            401: openapi.Response(description="Некорректные данные"),
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+class TokenVerifyView(TokenVerifyView):
+    @swagger_auto_schema(
+        operation_description='Проверка JWT-токена',
+        request_body=openapi.Schema(
+            required=['token'],
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'token': token_schema,
+            }
+        ),
+        responses={
+            200: openapi.Response(description="Токен валидный"),
+            401: openapi.Response(description="Некорректные данные"),
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+class TokenObtainPairView(TokenObtainPairView):
+    @swagger_auto_schema(
+        operation_description='Аутентификация пользователя. Возвращает JWT-токен',
+        request_body=openapi.Schema(
+            required=['email', 'password'],
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'email': email_schema,
+                'password': password_schema,
+            }
+        ),
+        responses={
+            200: TokenObtainPairResponseSerializer,
+            401: openapi.Response(description="Некорректные данные"),
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)

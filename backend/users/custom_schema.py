@@ -34,3 +34,11 @@ is_moderator_schema = openapi.Schema(
 is_admin_schema = openapi.Schema(
     type=openapi.TYPE_BOOLEAN,
     description='Админ или нет')
+
+token_schema = openapi.Schema(
+    type=openapi.TYPE_STRING,
+    description='Токен аутентификации')
+
+refresh_token_schema = openapi.Schema(
+    type=openapi.TYPE_STRING,
+    description='Токен обновления')
