@@ -2,10 +2,10 @@ import os
 
 from aiogram.client.session import aiohttp
 from aiohttp import ClientSession
-from aiogram import Router, F, html, types
+from aiogram import Router, F, html, types, Bot
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton, InputMediaPhoto, FSInputFile
 from aiogram.fsm.state import State, StatesGroup
 from inline_kbs import ease_link_kb, kb2, kb1, fin, link_kb0, f_s, kbg
 
@@ -83,7 +83,7 @@ async def send_photo(call: types.CallbackQuery, state: FSMContext):
 
 
 @start_router.message(SaveStatus.Q1)
-async def handle_photo(message: types.Message, state: FSMContext):
+async def handle_photo(message: types.Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
 
     photos = data.get('photos', [])  # Используем .get() для безопасного доступа
@@ -99,7 +99,13 @@ async def handle_photo(message: types.Message, state: FSMContext):
     await state.update_data(photos=photos)  # Обновляем данные состояния
 
     if len(photos) < 3:
-        await message.reply(f"Фотография получена! Отправь еще {3 - len(photos)} фотографий. 📷")
+        await message.delete()
+        media_group = []
+        for photo in photos:
+            media_group.append(InputMediaPhoto(media=photo))
+        
+        await bot.send_media_group(chat_id=message.chat.id,
+                                media=media_group)
     else:
         # Если три фотографии получены
         await message.answer("Пожалуйста включите определение местоположения", reply_markup=kbg())
