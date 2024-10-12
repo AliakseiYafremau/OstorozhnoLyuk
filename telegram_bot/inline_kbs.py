@@ -34,7 +34,7 @@ def kbg():
 
 def kb1():
     inline_kb1 = [
-        [InlineKeyboardButton(text="Пропустить", callback_data='Q6')],
+        [InlineKeyboardButton(text="Пропустить", callback_data='Q5')],
         [InlineKeyboardButton(text="Прервать", callback_data='stop_survey')],
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb1)
@@ -42,7 +42,7 @@ def kb1():
 
 def kb2():
     inline_kb2 = [
-        [InlineKeyboardButton(text="Пропустить", callback_data='Q7')],
+        [InlineKeyboardButton(text="Пропустить", callback_data='Q6')],
         [InlineKeyboardButton(text="Прервать", callback_data='stop_survey')],
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb2)
@@ -50,7 +50,7 @@ def kb2():
 
 def fin():
     inline_kb_fin = [
-        [InlineKeyboardButton(text="Завершить", callback_data='Q8')],
+        [InlineKeyboardButton(text="Завершить", callback_data='Q7')],
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb_fin)
 
