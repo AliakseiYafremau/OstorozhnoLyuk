@@ -6,7 +6,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 def ease_link_kb():
     inline_kb_list = [
         [InlineKeyboardButton(text="Оставить Заявку",
-                              callback_data='kb_geo')],
+                              callback_data='application')],
         [InlineKeyboardButton(text="📖 О проекте", callback_data='about')],
         [InlineKeyboardButton(text="📝 Контакты", callback_data='contact')],
         [InlineKeyboardButton(text="👤 Новости",
@@ -19,30 +19,38 @@ def ease_link_kb():
 
 def link_kb0():
     inline_kb_add = [
-        [InlineKeyboardButton(text="прервать", callback_data='stop_survey')],
+        [InlineKeyboardButton(text="Прервать", callback_data='stop_survey')],
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb_add)
 
 
+def kbg():
+    inline_kb1 = [
+        [InlineKeyboardButton(text="Предоставить координаты", callback_data='kb_geo')],
+        [InlineKeyboardButton(text="Прервать", callback_data='stop_survey')],
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=inline_kb1)
+
+
 def kb1():
     inline_kb1 = [
-        [InlineKeyboardButton(text="Пропустить", callback_data='Q4')],
-        [InlineKeyboardButton(text="прервать", callback_data='stop_survey')],
+        [InlineKeyboardButton(text="Пропустить", callback_data='Q6')],
+        [InlineKeyboardButton(text="Прервать", callback_data='stop_survey')],
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb1)
 
 
 def kb2():
     inline_kb2 = [
-        [InlineKeyboardButton(text="Пропустить", callback_data='Q5')],
-        [InlineKeyboardButton(text="прервать", callback_data='stop_survey')],
+        [InlineKeyboardButton(text="Пропустить", callback_data='Q7')],
+        [InlineKeyboardButton(text="Прервать", callback_data='stop_survey')],
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb2)
 
 
 def fin():
     inline_kb_fin = [
-        [InlineKeyboardButton(text="Завершить", callback_data='Q6')],
+        [InlineKeyboardButton(text="Завершить", callback_data='Q8')],
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb_fin)
 
