@@ -7,7 +7,7 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.fsm.state import State, StatesGroup
-from .inline_kbs import ease_link_kb, kb2, kb1, fin, link_kb0, f_s, kbg
+from inline_kbs import ease_link_kb, kb2, kb1, fin, link_kb0, f_s, kbg
 
 start_router = Router()
 
