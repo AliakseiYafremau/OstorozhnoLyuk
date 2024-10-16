@@ -17,9 +17,21 @@ def ease_link_kb():
     return InlineKeyboardMarkup(inline_keyboard=inline_kb_list)
 
 
+def contact_kb():
+    inline_co_kb_list = [
+        [InlineKeyboardButton(text="email", callback_data='Q5a')],
+        [InlineKeyboardButton(text="whatsapp", callback_data='Q5b')],
+        [InlineKeyboardButton(text="telegram", callback_data='Q5c')],
+        [InlineKeyboardButton(text="phone", callback_data='Q5d')],
+        [InlineKeyboardButton(text="Пропустить", callback_data='Q6')],
+        [InlineKeyboardButton(text="Прервать", callback_data='cancel')],
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=inline_co_kb_list)
+
+
 def link_kb0():
     inline_kb_add = [
-        [InlineKeyboardButton(text="Прервать", callback_data='stop_survey')],
+        [InlineKeyboardButton(text="Прервать", callback_data='cancel')],
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb_add)
 
@@ -27,7 +39,7 @@ def link_kb0():
 def kbg():
     inline_kb1 = [
         [InlineKeyboardButton(text="Предоставить координаты", callback_data='kb_geo')],
-        [InlineKeyboardButton(text="Прервать", callback_data='stop_survey')],
+        [InlineKeyboardButton(text="Прервать", callback_data='cancel')],
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb1)
 
@@ -35,7 +47,7 @@ def kbg():
 def kb1():
     inline_kb1 = [
         [InlineKeyboardButton(text="Пропустить", callback_data='Q5')],
-        [InlineKeyboardButton(text="Прервать", callback_data='stop_survey')],
+        [InlineKeyboardButton(text="Прервать", callback_data='cancel')],
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb1)
 
@@ -43,7 +55,7 @@ def kb1():
 def kb2():
     inline_kb2 = [
         [InlineKeyboardButton(text="Пропустить", callback_data='Q6')],
-        [InlineKeyboardButton(text="Прервать", callback_data='stop_survey')],
+        [InlineKeyboardButton(text="Прервать", callback_data='cancel')],
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb2)
 
@@ -57,6 +69,6 @@ def fin():
 
 def f_s():
     inline_kbc = [
-        [InlineKeyboardButton(text="Вернуться в Меню", callback_data='stop_survey')],
+        [InlineKeyboardButton(text="Вернуться в Меню", callback_data='cancel')],
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kbc)
