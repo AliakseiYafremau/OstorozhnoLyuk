@@ -10,8 +10,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.fsm.state import State, StatesGroup
 
-
-from telegram_bot.inline_kbs import ease_link_kb, kb2, kb1, fin, link_kb0, f_s, kbg, contact_kb  # убрать телеграмм_бот
+from telegram_bot.inline_kbs import ease_link_kb, kb1, fin, link_kb0, f_s, kbg, contact_kb  # убрать телеграмм_бот
 from telegram_bot.text_messages import cont, about_pr, hp
 
 start_router = Router()
@@ -93,7 +92,9 @@ async def send_help(message: types.Message):
 # регистрация заявки
 @start_router.callback_query(F.data == 'application')  # реакция на кнопку Создание заявки
 async def send_photo(call: types.CallbackQuery, state: FSMContext):
-    await call.message.answer("Пожалуйста, загрузите фото люка вблизи 1 шт.\n")
+    await call.message.answer("Сделайте 5 фото открытого люка в разных ракурсах: \n"
+                              "одну вблизи и четыре с окрестностями. \n"
+                              "Загрузите фото вблизи в режиме «фото» 1 шт.\n")
     await call.answer()
     await state.set_state(SaveStatus.Q1)
 
@@ -121,22 +122,20 @@ async def handle_photo(message: types.Message, state: FSMContext):
 
         total_photos = len(photos)  # считаем количество фото
         if total_photos == 1:
-            await message.reply("Загрузите Фото люка с окрестностями 4 шт. 📷")
-        elif total_photos < 5:
-            remaining_photos = 5 - total_photos
-            #await message.reply(f"Отправь еще {remaining_photos} фотографий. 📷")
-        else:  # total_photos == 5
+            await message.reply("Загрузите 4 фото открытого люка с окрестностями в режиме «фото». 📷")
+
+        if total_photos == 5:
             await message.answer("Все 5 фотографий загружены! Пожалуйста, включите определение местоположения.",
                                  reply_markup=kbg())
     else:
-        await message.answer("Пожалуйста, загрузите фотографию люка.")
+        await message.answer("Ошибка. Пожалуйста, загрузите фотографию люка.")
 
 
 @start_router.callback_query(F.data == 'kb_geo')  # Создание кнопки для получения координат
 async def send_geo(call: types.CallbackQuery,  state: FSMContext):
     button_geo = [[KeyboardButton(text="Отправить свою геолокацию", request_location=True)]]
     reply_markup = ReplyKeyboardMarkup(keyboard=button_geo, resize_keyboard=True)  # создаем простую кнопку
-    await call.message.answer("Нажмите кнопку внизу", reply_markup=reply_markup)
+    await call.message.answer("Нажмите кнопку внизу 👇", reply_markup=reply_markup)
     await call.answer()
     await state.set_state(SaveStatus.Q2)
 
@@ -262,9 +261,6 @@ async def end(call: types.CallbackQuery, state: FSMContext):
         value if not isinstance(value, types.Location) else {"latitude": value.latitude, "longitude": value.longitude})
                                 for key, value in data.items()}}
 
-    await call.message.answer(text="Ваша заявка создана! \n"
-                                   "спросить у дизайнеров как написать благодарность", reply_markup=f_s())  # спросить у дизайнеров как написать благодарность
-
     # Создаем multipart/form-data
     async with ClientSession() as session:
         form_data = aiohttp.FormData()
@@ -273,8 +269,8 @@ async def end(call: types.CallbackQuery, state: FSMContext):
         geo_data = {
             "type": "Point",
             "coordinates": [
-                user[call.from_user.id]['location']['longitude'],
-                user[call.from_user.id]['location']['latitude']
+                user[call.from_user.id]['location']['latitude'],
+                user[call.from_user.id]['location']['longitude']
             ]
         }
 
@@ -303,12 +299,14 @@ async def end(call: types.CallbackQuery, state: FSMContext):
                 form_data.add_field(f'file{idx + 1}', open(file_path, 'rb'), filename=os.path.basename(file_path))
 
         async with session.post('https://sf-hackathon.xyz/api/reports/new', data=form_data) as response:
-            body = await response.text()
+            #body = await response.text() # для отладки
             if response.status == 201:
-                await call.message.answer("Заявка успешно отправлена на сервер!")
+                await call.message.answer(text="Благодарим за создание заявки! \n"
+                                               "Мы ценим ваше внимание!", reply_markup=f_s())
             else:
-                await call.message.answer("Произошла ошибка при отправке данных на сервер."
-                                          F"Статус: {response.status}, Ответ: {body}")
+                await call.message.answer("Произошла ошибка при отправке данных на сервер. \n"
+                                          "Воспользуйтесь кнопкой в левом нижнем углу")
+                                          # F"Статус: {response.status}, Ответ: {body}") # для отладки
 
     await state.clear()
     await call.answer()
