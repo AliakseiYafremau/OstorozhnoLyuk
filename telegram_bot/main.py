@@ -8,8 +8,8 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
-from telegram_bot.handlers import start_router
-from telegram_bot.commands import commands
+from handlers import start_router
+from commands import commands
 from dotenv import load_dotenv
 
 

@@ -10,8 +10,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.fsm.state import State, StatesGroup
 
-from telegram_bot.inline_kbs import ease_link_kb, kb1, fin, link_kb0, f_s, kbg, contact_kb  # убрать телеграмм_бот
-from telegram_bot.text_messages import cont, about_pr, hp
+from inline_kbs import ease_link_kb, kb1, fin, link_kb0, f_s, kbg, contact_kb  # убрать телеграмм_бот
+from text_messages import cont, about_pr, hp
 
 start_router = Router()
 
@@ -299,7 +299,8 @@ async def end(call: types.CallbackQuery, state: FSMContext):
                 form_data.add_field(f'file{idx + 1}', open(file_path, 'rb'), filename=os.path.basename(file_path))
 
         async with session.post('https://sf-hackathon.xyz/api/reports/new', data=form_data) as response:
-            #body = await response.text() # для отладки
+
+            # body = await response.text() # для отладки
             if response.status == 201:
                 await call.message.answer(text="Благодарим за создание заявки! \n"
                                                "Мы ценим ваше внимание!", reply_markup=f_s())
