@@ -10,10 +10,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.fsm.state import State, StatesGroup
 
-from inline_kbs import ease_link_kb, kb1, fin, link_kb0, f_s, kbg, contact_kb  # убрать телеграмм_бот
-from text_messages import cont, about_pr, hp
+from inline_kbs import ease_link_kb, kb1, fin, link_kb0, f_s, kbg, contact_kb
+from text_messages import cont, about_pr, hp, stick_pr
 
 start_router = Router()
+logging.basicConfig(level=logging.INFO)
 
 
 class SaveStatus(StatesGroup):  # состояния для заявки
@@ -31,8 +32,6 @@ class SaveStatus(StatesGroup):  # состояния для заявки
     Q6b = State()
     Q6c = State()
     Q6d = State()
-    Q7 = State()
-    Q8 = State()
 
 
 # Задачи выполняемые ботом
@@ -67,6 +66,12 @@ async def send_about_com(message: types.Message):
     await message.answer(about_pr, reply_markup=ease_link_kb())
 
 
+@start_router.callback_query(F.data == 'stick')  # реакция на кнопку "О проекте"
+async def send_stick(call: CallbackQuery):
+    await call.message.edit_text(stick_pr, reply_markup=ease_link_kb())
+    await call.answer()
+
+
 @start_router.callback_query(F.data == 'cancel')  # реализация прерывания
 async def stop_survey(call: types.CallbackQuery, state: FSMContext):
     # Очищаем данные из MemoryStorage
@@ -84,7 +89,7 @@ async def send_about_com(message: types.Message, state: FSMContext):
     await message.answer("Оформление заявки завершено. Выберите действие:", reply_markup=ease_link_kb())
 
 
-@start_router.message(F.text == '/help')  # реакция на кнопку "Контакты"
+@start_router.message(F.text == '/help')
 async def send_help(message: types.Message):
     await message.answer(hp, reply_markup=ease_link_kb())
 
@@ -135,7 +140,8 @@ async def handle_photo(message: types.Message, state: FSMContext):
 async def send_geo(call: types.CallbackQuery,  state: FSMContext):
     button_geo = [[KeyboardButton(text="Отправить свою геолокацию", request_location=True)]]
     reply_markup = ReplyKeyboardMarkup(keyboard=button_geo, resize_keyboard=True)  # создаем простую кнопку
-    await call.message.answer("Нажмите кнопку внизу 👇", reply_markup=reply_markup)
+    await call.message.answer("Введи координаты в формате: широта, долгота (например: 55.7558, 37.6173) \n"
+                              "Или нажмите кнопку внизу 👇", reply_markup=reply_markup)
     await call.answer()
     await state.set_state(SaveStatus.Q2)
 
@@ -146,6 +152,23 @@ async def location_handler(message: types.Message, state: FSMContext):
     await message.answer(text="Спасибо!", reply_markup=types.ReplyKeyboardRemove())  # удаляем простую кнопку
     await message.answer(text="В каком вы городе?", reply_markup=link_kb0())
     await state.set_state(SaveStatus.Q3)  # изменение статуса
+
+
+# Новый хендлер для обработки координат вручную (в виде текста)
+
+@start_router.message(SaveStatus.Q2)
+async def manual_coordinates(message: types.Message, state: FSMContext):
+    try:
+        lat, lon = map(float, message.text.split(','))
+        location = types.Location(latitude=lat, longitude=lon)
+        await state.update_data(location=location)
+        await message.answer(text="Спасибо за координаты!", reply_markup=types.ReplyKeyboardRemove())
+        await message.answer(text="В каком вы городе?", reply_markup=link_kb0())
+        await state.set_state(SaveStatus.Q3)
+    except ValueError:
+        await message.answer(
+            "Ошибка! Пожалуйста, введи координаты в формате: широта, долгота (например: 55.7558, 37.6173)."
+        )
 
 
 @start_router.message(SaveStatus.Q3)
@@ -214,7 +237,6 @@ async def handle_email_input(message: types.Message, state: FSMContext):
     user_email = message.text.lower()
     await state.update_data(contacts=user_email)
     await message.answer(text="Завершить", reply_markup=fin())
-    await state.set_state(SaveStatus.Q7)
 
 
 @start_router.message(SaveStatus.Q6b)  # Если это вызов через текстовое сообщение
@@ -222,7 +244,6 @@ async def handle_whatsapp_input(message: types.Message, state: FSMContext):
     user_whatsapp = message.text.lower()
     await state.update_data(contacts=user_whatsapp)
     await message.answer(text="Завершить", reply_markup=fin())
-    await state.set_state(SaveStatus.Q7)
 
 
 @start_router.message(SaveStatus.Q6c)  # Если это вызов через текстовое сообщение
@@ -230,7 +251,6 @@ async def handle_telegram_input(message: types.Message, state: FSMContext):
     user_telegram = message.text.lower()
     await state.update_data(contacts=user_telegram)
     await message.answer(text="Завершить", reply_markup=fin())
-    await state.set_state(SaveStatus.Q7)
 
 
 @start_router.message(SaveStatus.Q6d)  # Если это вызов через текстовое сообщение
@@ -238,17 +258,6 @@ async def handle_phone_input(message: types.Message, state: FSMContext):
     user_phone = message.text.lower()
     await state.update_data(contacts=user_phone)
     await message.answer(text="Завершить", reply_markup=fin())
-    await state.set_state(SaveStatus.Q7)
-
-
-@start_router.callback_query(F.data == 'Q6')
-async def send_description(call: types.CallbackQuery, state: FSMContext):
-    await call.message.answer(text="Завершить", reply_markup=fin())
-    await call.answer()
-    await state.set_state(SaveStatus.Q7)
-
-
-logging.basicConfig(level=logging.INFO)
 
 
 @start_router.callback_query(F.data == 'Q7')

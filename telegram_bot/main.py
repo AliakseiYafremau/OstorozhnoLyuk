@@ -12,10 +12,7 @@ from handlers import start_router
 from commands import commands
 from dotenv import load_dotenv
 
-
 load_dotenv()
-
-
 TOKEN = getenv('TOKEN')  # Токен полученый при создании в наследство https://t.me/BotFather
 
 

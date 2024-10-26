@@ -13,20 +13,9 @@ def ease_link_kb():
                               web_app=WebAppInfo(url="https://ixbt.games/tools/"))],
         [InlineKeyboardButton(text="📚 Открытые люки в моём городе",
                               web_app=WebAppInfo(url="https://translate.yandex.ru/?source_lang=en&target_lang=ru"))],
+        [InlineKeyboardButton(text="😁 Стикеры", callback_data='stick')],
     ]
     return InlineKeyboardMarkup(inline_keyboard=inline_kb_list)
-
-
-def contact_kb():
-    inline_co_kb_list = [
-        [InlineKeyboardButton(text="email", callback_data='Q5a')],
-        [InlineKeyboardButton(text="whatsapp", callback_data='Q5b')],
-        [InlineKeyboardButton(text="telegram", callback_data='Q5c')],
-        [InlineKeyboardButton(text="phone", callback_data='Q5d')],
-        [InlineKeyboardButton(text="Пропустить", callback_data='Q6')],
-        [InlineKeyboardButton(text="Прервать", callback_data='cancel')],
-    ]
-    return InlineKeyboardMarkup(inline_keyboard=inline_co_kb_list)
 
 
 def link_kb0():
@@ -52,12 +41,16 @@ def kb1():
     return InlineKeyboardMarkup(inline_keyboard=inline_kb1)
 
 
-def kb2():
-    inline_kb2 = [
-        [InlineKeyboardButton(text="Пропустить", callback_data='Q6')],
+def contact_kb():
+    inline_co_kb_list = [
+        [InlineKeyboardButton(text="email", callback_data='Q5a')],
+        [InlineKeyboardButton(text="whatsapp", callback_data='Q5b')],
+        [InlineKeyboardButton(text="telegram", callback_data='Q5c')],
+        [InlineKeyboardButton(text="phone", callback_data='Q5d')],
+        [InlineKeyboardButton(text="Пропустить", callback_data='Q7')],
         [InlineKeyboardButton(text="Прервать", callback_data='cancel')],
     ]
-    return InlineKeyboardMarkup(inline_keyboard=inline_kb2)
+    return InlineKeyboardMarkup(inline_keyboard=inline_co_kb_list)
 
 
 def fin():
